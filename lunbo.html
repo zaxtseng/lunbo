@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://cdn.bootcss.com/jquery/2.1.4/jquery.js"></script>
+    <title>lunbo</title>
+
+    <style type="text/css">
+    .carousel {
+        position: relative;
+        width: 480px;
+        height: 300px;
+        margin: 30px auto;
+        overflow: hidden;
+    }
+    .carousel ul,
+    .carousel li{
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    .carousel .img-ct {
+        position: absolute;
+        overflow: hidden;
+    }
+    .carousel .img-ct>li {
+        float: left;
+    }
+    .carousel .img-ct img {
+        width: 480px;
+        height: 300px;
+    }
+    .carousel .arrow {
+        position: absolute;
+        top: 50%;
+        margin-top: -15px;
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 1px solid #fff;
+        line-height: 30px;
+        color: #fff;
+        text-align: center;
+        text-decoration: none;
+    }
+    .carousel .arrow:hover{
+        opactiy: 0.8;
+    }
+    .carousel .pre {
+        left: 10px;
+    }
+    .carousel .next {
+        right: 10px;
+    }
+    .carousel .bullet {
+        position: absolute;
+        bottom: 10px;
+        width: 100%;
+        font-size: 0;
+        z-index: 1;
+        text-align: center;
+    }
+    .carousel .bullet >li {
+        display: inline-block;
+        width: 30px;
+        height: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        margin: 0 3px;
+        cursor: pointer;
+    }
+    .carousel .bullet > li.active {
+        background-color: #ccc;
+    }
+    </style>
+</head>
+<body>
+    <div class="carousel">
+         <ul class="img-ct">
+             <li><a href="#"><img src="https://inews.gtimg.com/newsapp_bt/0/8473889538/640"></a></li>
+             <li><a href="#"><img src="https://inews.gtimg.com/newsapp_bt/0/8473890632/640"></a></li>
+             <li><a href="#"><img src="https://inews.gtimg.com/newsapp_bt/0/8473891292/640"></a></li>
+             <li><a href="#"><img src="http://t11.baidu.com/it/u=6242905,1932338288&fm=173&app=25&f=JPEG?w=640&h=360&s=AF6AFE1642337B940388D0470300F0E5"></a></li>
+         </ul>
+         <a class="pre arrow" href="#"><</a>
+         <a class="next arrow" href="#">></a>
+         <ul class="bullet">
+             <li class="active"></li>
+             <li></li>
+             <li></li>
+             <li></li>
+         </ul>
+    </div>
+<script>
+function Carousel($ct){
+    this.init($ct)
+    this.bind()
+    this.autoPlay()
+}
+Carousel.prototype = {
+    init: function($ct){
+        this.$ct = $ct
+        this.$imgCt   = this.$ct.find('.img-ct')
+        this.$imgs    = this.$ct.find('.img-ct > li')
+        this.$preBtn  = this.$ct.find('.pre')
+        this.$nextBtn = this.$ct.find('.next')
+        this.$bullets = this.$ct.find('.bullet li')
+
+        this.imgWidth = this.$imgs.width()
+        this.imgCount = this.$imgs.length
+        this.index = 0
+        this.isAnimate = false
+
+        this.$imgCt.append(this.$imgs.first().clone())
+        this.$imgCt.prepend(this.$imgs.last().clone())
+        this.$imgCt.width((this.imgCount + 2)*this.imgWidth)
+        this.$imgCt.css('left',-this.imgWidth)
+    },
+    bind: function(){
+        var _this = this
+        this.$preBtn.on('click', function(){
+            _this.playPre(1)
+        })
+        this.$nextBtn.on('click', function(){
+            _this.playNext(1)
+        })
+        this.$bullets.on('click', function(){
+            var index = $(this).index()
+            if(_this.index > index){
+                _this.playPre(_this.index -index)
+            }else {
+                _this.playNext(index - _this.index)
+            }
+        })
+    },
+    playNext: function(len){
+        if(this.isAnimate) return
+        this.isAnimate = true
+        var _this = this
+        this.$imgCt.animate({
+            left: '-='+this.imgWidth * len
+        },function(){
+            _this.index += len
+            if(_this.index === _this.imgCount){
+                _this.$imgCt.css('left',-_this.imgWidth)
+                _this.index = 0
+            }
+            _this.setBullet()
+            _this.isAnimate =false
+        })
+    },
+    playPre: function(len){
+        if(this.isAnimate) return
+        this.isAnimate = true
+
+        var _this = this
+        this.$imgCt.animate({
+            left: '+='+this.imgWidth * len
+        },function(){
+            _this.index -= len
+            if(_this.index < 0){
+                _this.$imgCt.css('left',-_this.imgWidth * _this.imgCount)
+                _this.index = _this.imgCount - 1
+            }
+            _this.setBullet()
+            _this.isAnimate = false
+        })
+    },
+    setBullet: function(){
+        this.$bullets.eq(this.index).addClass('active')
+            .siblings().removeClass('active')
+    },
+    autoPlay: function(){
+        var _this = this
+        this.autoClock = setInterval(function(){
+            _this.playNext(1)
+        },3000)
+    },
+    stopAuto: function(){
+        clearInterval(this.autoClock)
+    }
+}
+new Carousel($('.carousel'))
+
+
+
+
+</script>
+
+    
+</body>
+</html>
